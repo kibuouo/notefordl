@@ -1,5 +1,5 @@
 # Ignore the douban data directory
-# This prevents data files under douban/data/ from being tracked by git.
+# This prevents data files under historydemo/douban/data/ from being tracked by git.
 # Python
 __pycache__/
 *.pyc
@@ -8,7 +8,7 @@ __pycache__/
 .venv/
 
 # Data files
-douban/data/
+historydemo/douban/data/
 
 # VSCode
 .vscode/
