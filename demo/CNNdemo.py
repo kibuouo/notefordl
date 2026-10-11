@@ -6,6 +6,7 @@ from pathlib import Path
 from torch import nn
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
+from plot_utils import export_accuracy_chart
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # 0. 卷积层
@@ -121,15 +122,16 @@ for epoch in range(EPOCHS):
 os.makedirs("database", exist_ok=True)
 
 time_str = datetime.now().strftime("%Y%m%d_%H%M%S")
-
-df = pd.DataFrame(history)
 # 保存训练指标
+csv_path = save_dir / f"{time_str}_cnn_lr{LR}_batch{BATCH_SIZE}.csv" # 保存 CSV 文件路径
+df = pd.DataFrame(history)
+
 df.to_csv(
-    save_dir / f"{time_str}_cnn_lr{LR}_batch{BATCH_SIZE}.csv",
+    csv_path,
     index=False,
     float_format="%.4f" # 小数位
 )
-
+export_accuracy_chart(csv_path) # 导出准确率图表
 # 保存训练好的模型参数
 torch.save(
     model.state_dict(),

@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
 # 1. 准备数据
 EPOCHS = 50
 BATCH_SIZE = 64
