@@ -1,7 +1,6 @@
 import torch
 from datetime import datetime
 import pandas as pd
-import os
 from pathlib import Path
 from torch import nn
 from torch.utils.data import DataLoader
@@ -34,19 +33,21 @@ class SimpleCNN(nn.Module):
 
 
 # 1. 准备数据
-save_dir = Path("database")
+demo_dir = Path(__file__).resolve().parent
+data_dir = demo_dir / "data"
+save_dir = demo_dir / "database"
 save_dir.mkdir(parents=True, exist_ok=True)
 EPOCHS = 50
 BATCH_SIZE = 64
 LR = 0.01
 train_set = datasets.MNIST(
-    root="./data",
+    root=data_dir,
     train=True,# 训练集
     download=True,# 下载数据集
     transform=transforms.ToTensor() # 将图像转换为张量
 )
 test_set = datasets.MNIST(
-    root="./data",
+    root=data_dir,
     train=False,# 测试集
     download=True,# 下载数据集
     transform=transforms.ToTensor() # 将图像转换为张量
@@ -119,7 +120,6 @@ for epoch in range(EPOCHS):
         "test_accuracy": accuracy
     })
     print(f"测试准确率：{accuracy * 100:.2f}%")
-os.makedirs("database", exist_ok=True)
 
 time_str = datetime.now().strftime("%Y%m%d_%H%M%S")
 # 保存训练指标
