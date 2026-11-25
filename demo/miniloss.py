@@ -1,5 +1,5 @@
 import torch
-import torch.nn as nn
+from torch import nn
 
 x = torch.tensor(
     [[1.0], 

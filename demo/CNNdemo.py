@@ -1,11 +1,13 @@
-import torch
 from datetime import datetime
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
+import torch
+from plot_utils import export_accuracy_chart
 from torch import nn
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
-from plot_utils import export_accuracy_chart
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # 0. 卷积层
