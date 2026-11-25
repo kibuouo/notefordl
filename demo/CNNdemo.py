@@ -8,10 +8,44 @@ from torch import nn
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+if torch.backends.mps.is_available():
+    device = torch.device("mps")
+elif torch.cuda.is_available():
+    device = torch.device("cuda")
+else:
+    device = torch.device("cpu")
+
+class ResidualBlock(nn.Module):
+    #定义残差块的初始化函数
+    def __init__(self, channels):
+        super().__init__()
+        #定义残差块的卷积层、批归一化层和激活函数
+        self.conv1 = nn.Conv2d(channels, channels, 3, padding=1)
+        self.bn1 = nn.BatchNorm2d(channels)
+        self.relu = nn.ReLU()
+        #定义第二个卷积层和批归一化层
+        self.conv2 = nn.Conv2d(channels, channels, 3, padding=1)
+        self.bn2 = nn.BatchNorm2d(channels)
+    #定义前向传播函数
+    def forward(self, x):
+        #残差连接
+        identity = x
+
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+
+        out = self.conv2(out)
+        out = self.bn2(out)
+        #y=F(x)+x
+        out = out + identity
+        out = self.relu(out)
+
+        return out
+
 
 # 0. 卷积层
-class SimpleCNN(nn.Module):
+class ResCNN(nn.Module):
     def __init__(self):
         super().__init__()
 
@@ -21,13 +55,16 @@ class SimpleCNN(nn.Module):
             kernel_size=3,
             padding=1
         )
-
+# 新增残差块
+        self.resblock = ResidualBlock(8)
         self.pool = nn.MaxPool2d(2)
         self.fc = nn.Linear(8 * 14 * 14, 10)
 
     def forward(self, x):
         x = self.conv(x)        # [64, 8, 28, 28]
         x = torch.relu(x)      # 激活函数
+        #经过残差块
+        x = self.resblock(x)   # [64, 8, 28, 28]
         x = self.pool(x)       # [64, 8, 14, 14]
         x = torch.flatten(x, 1) # [64, 1568]
         x = self.fc(x)         # [64, 10]
@@ -65,9 +102,8 @@ test_loader = DataLoader(
     shuffle=False # 测试集不需要打乱
 )
 # 2. 定义模型
-model = SimpleCNN()
-model = model.to(device)
-model = model.to(device)
+model = ResCNN().to(device)
+
 # 3. 损失函数
 criterion = nn.CrossEntropyLoss()
 
@@ -125,7 +161,7 @@ for epoch in range(EPOCHS):
 
 time_str = datetime.now().strftime("%Y%m%d_%H%M%S")
 # 保存训练指标
-csv_path = save_dir / f"{time_str}_cnn_lr{LR}_batch{BATCH_SIZE}.csv" # 保存 CSV 文件路径
+csv_path = save_dir / f"{time_str}_Rescnn_lr{LR}_batch{BATCH_SIZE}.csv" # 保存 CSV 文件路径
 df = pd.DataFrame(history)
 
 df.to_csv(
@@ -137,5 +173,6 @@ export_accuracy_chart(csv_path) # 导出准确率图表
 # 保存训练好的模型参数
 torch.save(
     model.state_dict(),
-    save_dir / f"{time_str}_cnn_model.pth"
+    save_dir / f"{time_str}_Rescnn_model.pth"
 )
+    

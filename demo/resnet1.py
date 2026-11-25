@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-class ResCNN(nn.Module):
+class ResidualBlock(nn.Module):
     #定义残差块的初始化函数
     def __init__(self, channels):
         super().__init__()
